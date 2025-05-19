@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Vortex - Interactive Experience</title>
+    <style>
+        :root {
+            --primary-color: #0f0;
+            --secondary-color: #ff00ff;
+            --tertiary-color: #00ffff;
+            --background-color: #000;
+            --text-color: #fff;
+            --glow-intensity: 20px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
+            transition: background 1s ease;
+            perspective: 1000px;
+        }
+
+        .cosmic-title {
+            position: absolute;
+            top: 5%;
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px var(--primary-color),
+                         0 0 20px var(--primary-color),
+                         0 0 40px var(--primary-color);
+            animation: pulse 2s infinite alternate;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-50px);
+            transition: all 1s ease;
+        }
+
+        .cosmic-title.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes pulse {
+            0% {
+                text-shadow: 0 0 10px var(--primary-color),
+                             0 0 20px var(--primary-color);
+            }
+            100% {
+                text-shadow: 0 0 20px var(--primary-color),
+                             0 0 40px var(--primary-color),
+                             0 0 60px var(--primary-color);
+            }
+        }
+
+        .controls-container {
+            position: absolute;
+            bottom: 5%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 1000;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            color: var(--text-color);
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: all var(--transition-speed) ease;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .control-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.5s ease;
+        }
+
+        .control-button:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .start-button {
+            background: linear-gradient(45deg, #00ff00, #00aa00);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+        }
+
+        .start-button:hover {
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.9);
+            transform: translateY(-5px);
+        }
+
+        .start-button:active {
+            transform: translateY(3px);
+        }
+
+        .stop-button {
+            background: linear-gradient(45deg, #ff3333, #aa0000);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+        }
+
+        .stop-button:hover {
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.9);
+            transform: translateY(-5px);
+        }
+
+        .stop-button:active {
+            transform: translateY(3px);
+        }
+
+        .theme-button {
+            background: linear-gradient(45deg, #ff00ff, #aa00aa);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
+        }
+
+        .theme-button:hover {
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.9);
+            transform: translateY(-5px);
+        }
+
+        .reset-button {
+            background: linear-gradient(45deg, #00ffff, #00aaaa);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+        }
+
+        .reset-button:hover {
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.9);
+            transform: translateY(-5px);
+        }
+
+        .settings-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            transition: all 0.5s ease;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .settings-panel.active {
+            max-height: 500px;
+            opacity: 1;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .animation-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            perspective: 1000px;
+        }
+
+        .vortex-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-style: preserve-3d;
+            transform: translate(-50%, -50%) rotateX(70deg);
+            width: 100%;
+            height: 100vh;
+        }
+
+        .circle {
+            position: absolute;
+            background: transparent;
+            width: calc(var(--i) * 2.5vmin);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            transform-style: preserve-3d;
+            transform: rotateX(0deg) translateZ(50px);
+            animation: animate 3s ease-in-out calc(var(--i) * 0.08s) infinite;
+            box-shadow: 0 0 15px rgba(124, 124, 124, 0.7),
+                        inset 0 0 15px rgba(124, 124, 124, 0.7);
+            transition: all 0.5s ease;
+        }
+
+        @keyframes animate {
+            0%, 100% {
+                transform: rotateX(0deg) translateZ(50px) translateY(0);
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                transform: rotateX(0deg) translateZ(50px) translateY(-50vmin);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary-color);
+            animation: particleFloat 15s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(calc(var(--random) * 200px)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .visualizer-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .visualizer-container.active {
+            opacity: 1;
+        }
+
+        .visualizer-bar {
+            width: 5px;
+            height: 5px;
+            margin: 0 2px;
+            background: var(--primary-color);
+            border-radius: 5px 5px 0 0;
+            transition: height 0.1s ease;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .cursor-trailer {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            z-index: 10000;
+            opacity: 0.7;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, opacity 0.3s;
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 1s ease;
+        }
+
+        .loader {
+            width: 100px;
+            height: 100px;
+            border: 5px solid transparent;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .torus {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-style: preserve-3d;
+            animation: torusRotate 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes torusRotate {
+            0% { transform: translate(-50%, -50%) rotateX(0deg) rotateY(0deg); }
+            100% { transform: translate(-50%, -50%) rotateX(360deg) rotateY(360deg); }
+        }
+
+        .torus-segment {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary-color);
+            transform-style: preserve-3d;
+        }
+
+        /* Theme variations */
+        .theme-green {
+            --primary-color: #0f0;
+            --secondary-color: #00ff7f;
+            --tertiary-color: #7fff00;
+        }
+
+        .theme-blue {
+            --primary-color: #00f;
+            --secondary-color: #00ffff;
+            --tertiary-color: #0099ff;
+        }
+
+        .theme-purple {
+            --primary-color: #8a2be2;
+            --secondary-color: #9400d3;
+            --tertiary-color: #ff00ff;
+        }
+
+        .theme-red {
+            --primary-color: #ff0000;
+            --secondary-color: #ff5555;
+            --tertiary-color: #ff9966;
+        }
+
+        .theme-rainbow {
+            --primary-color: #ff00ff;
+            --secondary-color: #00ffff;
+            --tertiary-color: #ffff00;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .cosmic-title {
+                font-size: 2rem;
+            }
+            
+            .control-button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            
+            .circle {
+                width: calc(var(--i) * 2vmin);
+            }
+        }
+    </style>
+</head>
+<body class="theme-green">
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Title -->
+    <h1 class="cosmic-title">Cosmic Vortex</h1>
+
+    <!-- Background Audio -->
+    <audio id="backgroundMusic" loop>
+        <source src="animation-sound.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Controls Container -->
+    <div class="controls-container">
+        <div class="button-container">
+            <button class="control-button start-button" id="startBtn">LAUNCH</button>
+            <button class="control-button stop-button" id="stopBtn">STOP</button>
+            <button class="control-button theme-button" id="themeBtn">THEME</button>
+            <button class="control-button reset-button" id="settingsBtn">SETTINGS</button>
+        </div>
+        
+        <div class="settings-panel" id="settingsPanel">
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Animation Speed</span>
+                    <span id="speedValue">1x</span>
+                </div>
+                <input type="range" min="0.5" max="3" step="0.1" value="1" class="slider" id="speedSlider">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Circle Count</span>
+                    <span id="circleValue">20</span>
+                </div>
+                <input type="range" min="5" max="50" step="1" value="20" class="slider" id="circleSlider">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Particle Density</span>
+                    <span id="particleValue">100</span>
+                </div>
+                <input type="range" min="0" max="300" step="10" value="100" class="slider" id="particleSlider">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Music Volume</span>
+                    <span id="volumeValue">50%</span>
+                </div>
+                <input type="range" min="0" max="100" step="1" value="50" class="slider" id="volumeSlider">
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Animation Container -->
+    <div class="animation-container" id="animationContainer">
+        <div class="vortex-container" id="vortexContainer">
+            <!-- Circles will be dynamically generated -->
+        </div>
+        
+        <div class="torus" id="torus">
+            <!-- Torus segments will be dynamically generated -->
+        </div>
+    </div>
+
+    <!-- Audio Visualizer -->
+    <div class="visualizer-container" id="visualizerContainer">
+        <!-- Bars will be dynamically generated -->
+    </div>
+
+    <!-- Particles Container -->
+    <div class="particles-container" id="particlesContainer">
+        <!-- Particles will be dynamically generated -->
+    </div>
+
+    <!-- Cursor Trailer -->
+    <div class="cursor-trailer" id="cursorTrailer"></div>
+
+    <script>
+        // DOM Elements
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const themeBtn = document.getElementById('themeBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const speedSlider = document.getElementById('speedSlider');
+        const circleSlider = document.getElementById('circleSlider');
+        const particleSlider = document.getElementById('particleSlider');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const speedValue = document.getElementById('speedValue');
+        const circleValue = document.getElementById('circleValue');
+        const particleValue = document.getElementById('particleValue');
+        const volumeValue = document.getElementById('volumeValue');
+        const animationContainer = document.getElementById('animationContainer');
+        const vortexContainer = document.getElementById('vortexContainer');
+        const visualizerContainer = document.getElementById('visualizerContainer');
+        const particlesContainer = document.getElementById('particlesContainer');
+        const cursorTrailer = document.getElementById('cursorTrailer');
+        const torus = document.getElementById('torus');
+        const cosmicTitle = document.querySelector('.cosmic-title');
+        const loadingScreen = document.querySelector('.loading-screen');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        
+        // Configuration
+        let config = {
+            speed: 1,
+            circleCount: 20,
+            particleCount: 100,
+            volume: 0.5,
+            isRunning: false,
+            activeTheme: 'green',
+            themes: ['green', 'blue', 'purple', 'red', 'rainbow'],
+        };
+        
+        // Audio context for visualization
+        let audioContext, analyser, dataArray;
+        
+        // Animation frames
+        let animationFrame;
+        let particleAnimationFrame;
+        let visualizerAnimationFrame;
+        
+        // Initialize the application
+        function init() {
+            // Simulate loading time
+            setTimeout(() => {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    cosmicTitle.classList.add('active');
+                }, 1000);
+            }, 2000);
+            
+            // Generate initial circles based on default config
+            generateCircles(config.circleCount);
+            
+            // Generate torus
+            generateTorus();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Generate visualizer bars
+            generateVisualizerBars();
+        }
+        
+        // Generate circles for the vortex
+        function generateCircles(count) {
+            vortexContainer.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'circle';
+                circle.style.setProperty('--i', i);
+                vortexContainer.appendChild(circle);
+            }
+        }
+        
+        // Generate torus effect
+        function generateTorus() {
+            torus.innerHTML = '';
+            const segments = 100;
+            const radius = 150;
+            const tubeRadius = 30;
+            
+            for (let i = 0; i < segments; i++) {
+                const angle1 = (i / segments) * Math.PI * 2;
+                for (let j = 0; j < segments / 4; j++) {
+                    const angle2 = (j / (segments / 4)) * Math.PI * 2;
+                    
+                    const x = (radius + tubeRadius * Math.cos(angle2)) * Math.cos(angle1);
+                    const y = (radius + tubeRadius * Math.cos(angle2)) * Math.sin(angle1);
+                    const z = tubeRadius * Math.sin(angle2);
+                    
+                    const segment = document.createElement('div');
+                    segment.className = 'torus-segment';
+                    segment.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
+                    segment.style.opacity = j % 3 === 0 ? '0.8' : '0';  // Only show every 3rd segment for performance
+                    
+                    torus.appendChild(segment);
+                }
+            }
+        }
+        
+        // Generate audio visualizer bars
+        function generateVisualizerBars() {
+            visualizerContainer.innerHTML = '';
+            const barCount = 64;
+            
+            for (let i = 0; i < barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'visualizer-bar';
+                visualizerContainer.appendChild(bar);
+            }
+        }
+        
+        // Generate particles
+        function generateParticles(count) {
+            particlesContainer.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random positioning
+                const posX = Math.random() * window.innerWidth;
+                const delay = Math.random() * 15;
+                const size = Math.random() * 4 + 1;
+                const randomX = Math.random() * 200 - 100;
+                
+                particle.style.left = `${posX}px`;
+                particle.style.bottom = '-20px';
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.opacity = Math.random() * 0.5 + 0.3;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.setProperty('--random', randomX);
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Start the animation and effects
+        function startAnimation() {
+            if (config.isRunning) return;
+            
+            config.isRunning = true;
+            animationContainer.style.display = 'block';
+            visualizerContainer.classList.add('active');
+            
+            // Play music and setup audio analyzer
+            backgroundMusic.volume = config.volume;
+            backgroundMusic.play().catch(e => console.log("Audio playback error:", e));
+            
+            // Simulate audio with random visualizer
+            startVisualizer();
+            
+            // Generate particles
+            generateParticles(config.particleCount);
+            
+            // Start animation loops
+            animateTorus();
+        }
+        
+        // Stop all animations and effects
+        function stopAnimation() {
+            config.isRunning = false;
+            animationContainer.style.display = 'none';
+            visualizerContainer.classList.remove('active');
+            
+            // Stop audio
+            backgroundMusic.pause();
+            backgroundMusic.currentTime = 0;
+            
+            // Cancel animation frames
+            cancelAnimationFrame(animationFrame);
+            cancelAnimationFrame(particleAnimationFrame);
+            cancelAnimationFrame(visualizerAnimationFrame);
+        }
+        
+        // Animate the torus
+        function animateTorus() {
+            // Additional animation logic can go here
+            animationFrame = requestAnimationFrame(animateTorus);
+        }
+        
+        // Start audio visualizer with simulated audio data
+        function startVisualizer() {
+            const bars = document.querySelectorAll('.visualizer-bar');
+            
+            function updateVisualizer() {
+                // Simulate audio data
+                for (let i = 0; i < bars.length; i++) {
+                    const height = Math.random() * 100; // Random height for visualization effect
+                    bars[i].style.height = `${height}px`;
+                }
+                
+                visualizerAnimationFrame = requestAnimationFrame(updateVisualizer);
+            }
+            
+            updateVisualizer();
+        }
+        
+        // Change theme
+        function changeTheme() {
+            const currentThemeIndex = config.themes.indexOf(config.activeTheme);
+            const nextThemeIndex = (currentThemeIndex + 1) % config.themes.length;
+            config.activeTheme = config.themes[nextThemeIndex];
+            
+            // Remove all theme classes
+            document.body.classList.remove(...config.themes.map(theme => `theme-${theme}`));
+            
+            // Add the new theme class
+            document.body.classList.add(`theme-${config.activeTheme}`);
+        }
+        
+        // Toggle settings panel
+        function toggleSettings() {
+            settingsPanel.classList.toggle('active');
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Button event listeners
+            startBtn.addEventListener('click', startAnimation);
+            stopBtn.addEventListener('click', stopAnimation);
+            themeBtn.addEventListener('click', changeTheme);
+            settingsBtn.addEventListener('click', toggleSettings);
+            
+            // Slider event listeners
+            speedSlider.addEventListener('input', (e) => {
+                config.speed = parseFloat(e.target.value);
+                speedValue.textContent = `${config.speed}x`;
+                
+                // Update animation speed
+                document.documentElement.style.setProperty('--animation-speed', `${3 / config.speed}s`);
+                
+                // Update all circle animations
+                const circles = document.querySelectorAll('.circle');
+                circles.forEach(circle => {
+                    circle.style.animationDuration = `${3 / config.speed}s`;
+                });
+            });
+            
+            circleSlider.addEventListener('input', (e) => {
+                config.circleCount = parseInt(e.target.value);
+                circleValue.textContent = config.circleCount;
+                
+                // Regenerate circles
+                generateCircles(config.circleCount);
+            });
+            
+            particleSlider.addEventListener('input', (e) => {
+                config.particleCount = parseInt(e.target.value);
+                particleValue.textContent = config.particleCount;
+                
+                if (config.isRunning) {
+                    // Regenerate particles if animation is running
+                    generateParticles(config.particleCount);
+                }
+            });
+            
+            volumeSlider.addEventListener('input', (e) => {
+                config.volume = parseInt(e.target.value) / 100;
+                volumeValue.textContent = `${parseInt(e.target.value)}%`;
+                
+                // Update audio volume
+                backgroundMusic.volume = config.volume;
+            });
+            
+            // Cursor trailer effect
+            document.addEventListener('mousemove', (e) => {
+                cursorTrailer.style.left = `${e.clientX}px`;
+                cursorTrailer.style.top = `${e.clientY}px`;
+            });
+            
+            // Interactive elements effect
+            document.querySelectorAll('.control-button').forEach(button => {
+                button.addEventListener('mouseenter', () => {
+                    cursorTrailer.style.width = '50px';
+                    cursorTrailer.style.height = '50px';
+                    cursorTrailer.style.opacity = '0.9';
+                });
+                
+                button.addEventListener('mouseleave', () => {
+                    cursorTrailer.style.width = '20px';
+                    cursorTrailer.style.height = '20px';
+                    cursorTrailer.style.opacity = '0.7';
+                });
+            });
+            
+            // Window resize event
+            window.addEventListener('resize', () => {
+                // Regenerate particles on window resize if animation is running
+                if (config.isRunning) {
+                    generateParticles(config.particleCount);
+                }
+            });
+            
+            // Key press events for shortcuts
+            document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case ' ':  // Space bar
+                        config.isRunning ? stopAnimation() : startAnimation();
+                        break;
+                    case 't':  // T key
+                        changeTheme();
+                        break;
+                    case 's':  // S key
+                        toggleSettings();
+                        break;
+                }
+            });
+        }
+        
+        // Initialize the application when the page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
